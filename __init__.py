@@ -7,13 +7,6 @@ from fiftyone.operators import types
 
 from .zoo import OPERATIONS, MiniCPM_V
 
-MODES = {
-    "vqa": "Visual question answering",
-    "detection": "Visual question answering",
-    "classification": "Visual question answering",
-    "keypoint": "Visual question answering"
-}
-
 logger = logging.getLogger(__name__)
 
 def download_model(model_name, model_path, **kwargs):
@@ -54,7 +47,7 @@ def load_model(model_name, model_path, **kwargs):
     print(f"Loading MiniCPM-V model from {model_path}")
 
     # Create and return the model - operations specified at apply time
-    return FastVLM(model_path=model_path, **kwargs)
+    return MiniCPM_V(model_path=model_path, **kwargs)
 
 
 def resolve_input(self, ctx):
