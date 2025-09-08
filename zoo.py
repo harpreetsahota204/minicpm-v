@@ -73,13 +73,26 @@ The JSON should contain points in pixel coordinates [x,y] format, where:
 - You can point to multiple visual elements
 """
 
+DEFAULT_OCR_SYSTEM_PROMPT = """You are an OCR assistant. Your task is to identify and extract all visible text from the image provided. Preserve the original formatting as closely as possible, including:
+
+- Line breaks and paragraphs  
+- Headings and subheadings  
+- Any tables, lists, bullet points, or numbered items  
+- Special characters, spacing, and alignment  
+
+Output strictly the extracted text in Markdown format, reflecting the layout and structure of the original image. Do not add commentary, interpretation, or summarization—only return the raw text content with its formatting.
+
+Respond with 'No Text' if there is no text in the provided image.
+"""
+
 DEFAULT_VQA_SYSTEM_PROMPT = "You are a helpful assistant. You provide clear and concise answerss to questions about images. Report answers in natural language text in English."
 
 OPERATIONS = {
     "vqa": DEFAULT_VQA_SYSTEM_PROMPT,
-    "detection": DEFAULT_DETECTION_SYSTEM_PROMPT,
-    "classification": DEFAULT_CLASSIFICATION_SYSTEM_PROMPT,
-    "keypoint": DEFAULT_KEYPOINT_SYSTEM_PROMPT
+    "ocr": DEFAULT_OCR_SYSTEM_PROMPT,
+    "detect": DEFAULT_DETECTION_SYSTEM_PROMPT,
+    "classify": DEFAULT_CLASSIFICATION_SYSTEM_PROMPT,
+    "point": DEFAULT_KEYPOINT_SYSTEM_PROMPT
 }
 
 
@@ -431,13 +444,14 @@ class MiniCPM_V(SamplesMixin, Model):
         # For VQA, return the raw text output
         if self.operation == "vqa":
             return output_text.strip()
-        elif self.operation == "detection":
-            # Detection always uses ref/box tags, never JSON
+        elif self.operation == "ocr":
+            return output_text.strip()
+        elif self.operation == "detect":
             return self._to_detections(output_text)
-        elif self.operation == "classification":
+        elif self.operation == "classify":
             parsed_output = self._parse_json(output_text)
             return self._to_classifications(parsed_output)
-        elif self.operation == "keypoint":
+        elif self.operation == "point":
             parsed_output = self._parse_json(output_text)
             return self._to_keypoints(parsed_output)
 
