@@ -1,0 +1,32 @@
+{
+    "name": "MiniCPM-V-4_5",
+    "url": "https://github.com/harpreetsahota204/minicpm-v",
+    "models": [
+        {
+            "base_name": "openbmb/MiniCPM-V-4_5",
+            "base_filename":"MiniCPM-V-4_5",
+            "author": "QwenLM",
+            "license": "Apache-2.0 license",
+            "source": "https://huggingface.co/openbmb/MiniCPM-V-4_5",
+            "description": "MiniCPM-V 4.5 is the latest and most capable model in the MiniCPM-V series. The model is built on Qwen3-8B and SigLIP2-400M with a total of 8B parameters.",
+            "tags": [
+                "detection",
+                "keypoints",
+                "ocr",
+                "VLM",
+                "classification",
+                "zero-shot"
+            ],
+            "date_added": "2025-08-09",
+            "requirements": {
+                "packages": ["huggingface-hub", "transformers", "torch", "torchvision"],
+                "cpu": {
+                    "support": true
+                },
+                "gpu": {
+                    "support": true
+                }
+            }
+        }
+    ]
+}
