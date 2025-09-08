@@ -144,7 +144,7 @@ class MiniCPM_V(SamplesMixin, Model):
             )
 
         logger.info("Loading tokenizer")
-        self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=True, trust_remote_code=True)
         self.model.eval()
 
     @property
