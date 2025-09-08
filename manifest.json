@@ -5,8 +5,8 @@
         {
             "base_name": "openbmb/MiniCPM-V-4_5",
             "base_filename":"MiniCPM-V-4_5",
-            "author": "QwenLM",
-            "license": "Apache-2.0 license",
+            "author": "Open Lab for Big Model Base",
+            "license": "MiniCPM Model License",
             "source": "https://huggingface.co/openbmb/MiniCPM-V-4_5",
             "description": "MiniCPM-V 4.5 is the latest and most capable model in the MiniCPM-V series. The model is built on Qwen3-8B and SigLIP2-400M with a total of 8B parameters.",
             "tags": [
