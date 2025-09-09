@@ -220,8 +220,6 @@ class MiniCPM_V(SamplesMixin, Model):
             parsed_json = json.loads(json_str)
             return parsed_json
         except:
-            # Log parsing failures for debugging
-            print(f"Failed to parse JSON: {json_str[:200]}")
             return None
     
     def _parse_box_tags(self, text: str) -> List[Dict]:
@@ -466,18 +464,13 @@ class MiniCPM_V(SamplesMixin, Model):
         if sample is not None and self._get_field() is not None:
             field_value = sample.get_field(self._get_field())
             if field_value is not None:
-                prompt = str(field_value)  # Local variable, doesn't affect instance
+                prompt = field_value  # Local variable, doesn't affect instance
         
         if not prompt:
             raise ValueError("No prompt provided.")
 
         # Format prompt based on operation type
         formatted_prompt = self._format_prompt_for_operation(prompt, self.operation)
-        
-        # Debug logging
-        print(f"Operation: {self.operation}")
-        print(f"Original prompt: {prompt!r}")
-        print(f"Formatted prompt: {formatted_prompt!r}")
 
         msgs = [{'role': 'user', 'content': [image,  formatted_prompt]}]
 
@@ -492,9 +485,6 @@ class MiniCPM_V(SamplesMixin, Model):
             tokenizer=self.tokenizer, 
             system_prompt = self.system_prompt,
             generation_config=generation_config)
-        
-        # Debug logging for model output
-        print(f"Model output for {self.operation}: {output_text[:200]!r}...")
 
         # For VQA, return the raw text output
         if self.operation == "vqa":
