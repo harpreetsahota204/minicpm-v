@@ -221,7 +221,7 @@ class MiniCPM_V(SamplesMixin, Model):
             return parsed_json
         except:
             # Log parsing failures for debugging
-            logger.debug(f"Failed to parse JSON: {json_str[:200]}")
+            print(f"Failed to parse JSON: {json_str[:200]}")
             return None
     
     def _parse_box_tags(self, text: str) -> List[Dict]:
@@ -292,7 +292,7 @@ class MiniCPM_V(SamplesMixin, Model):
                 detections.append(detection)
                     
             except Exception as e:
-                logger.debug(f"Error processing box {box}: {e}")
+                print(f"Error processing box {box}: {e}")
                 continue
                     
         return fo.Detections(detections=detections)
@@ -332,7 +332,7 @@ class MiniCPM_V(SamplesMixin, Model):
                 )
                 classifications.append(classification)
             except Exception as e:
-                logger.debug(f"Error processing classification {cls}: {e}")
+                print(f"Error processing classification {cls}: {e}")
                 continue
                 
         return fo.Classifications(classifications=classifications)
@@ -374,7 +374,7 @@ class MiniCPM_V(SamplesMixin, Model):
         
         # Join all items and prepend with instruction
         if formatted_items:
-            formatted_prompt = "Provide the coordinates of the following: " + " ".join(formatted_items)
+            formatted_prompt = "Detect, localize, and provide the coordinates of the following objects: " + " ".join(formatted_items)
             return formatted_prompt
         else:
             # If no valid items, return original prompt
@@ -433,7 +433,7 @@ class MiniCPM_V(SamplesMixin, Model):
                 )
                 keypoints.append(keypoint)
             except Exception as e:
-                logger.debug(f"Error processing point {point}: {e}")
+                print(f"Error processing point {point}: {e}")
                 continue
                 
         return fo.Keypoints(keypoints=keypoints)
@@ -473,6 +473,11 @@ class MiniCPM_V(SamplesMixin, Model):
 
         # Format prompt based on operation type
         formatted_prompt = self._format_prompt_for_operation(prompt, self.operation)
+        
+        # Debug logging
+        print(f"Operation: {self.operation}")
+        print(f"Original prompt: {prompt!r}")
+        print(f"Formatted prompt: {formatted_prompt!r}")
 
         msgs = [{'role': 'user', 'content': [image,  formatted_prompt]}]
 
@@ -487,6 +492,9 @@ class MiniCPM_V(SamplesMixin, Model):
             tokenizer=self.tokenizer, 
             system_prompt = self.system_prompt,
             generation_config=generation_config)
+        
+        # Debug logging for model output
+        print(f"Model output for {self.operation}: {output_text[:200]!r}...")
 
         # For VQA, return the raw text output
         if self.operation == "vqa":
