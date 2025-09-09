@@ -92,7 +92,8 @@ OPERATIONS = {
     "ocr": DEFAULT_OCR_SYSTEM_PROMPT,
     "detect": DEFAULT_DETECTION_SYSTEM_PROMPT,
     "classify": DEFAULT_CLASSIFICATION_SYSTEM_PROMPT,
-    "point": DEFAULT_KEYPOINT_SYSTEM_PROMPT
+    "point": DEFAULT_KEYPOINT_SYSTEM_PROMPT,
+    "phrase_grounding": DEFAULT_DETECTION_SYSTEM_PROMPT  # Uses same prompt as detect
 }
 
 
@@ -336,6 +337,49 @@ class MiniCPM_V(SamplesMixin, Model):
                 
         return fo.Classifications(classifications=classifications)
 
+    def _format_prompt_for_operation(self, prompt: Union[str, List], operation: str) -> str:
+        """Format prompt based on operation type.
+        
+        For 'point' and 'detect' operations, handles list inputs and formats with <ref> tags.
+        For 'phrase_grounding' operation, wraps the entire prompt in <ref> tags with a specific prefix.
+        For other operations, returns the prompt as-is.
+        
+        Args:
+            prompt: Either a string or list of items to find
+            operation: The current operation type
+            
+        Returns:
+            Formatted prompt string
+        """
+        # Handle phrase_grounding operation
+        if operation == "phrase_grounding":
+            # Wrap the entire prompt in <ref> tags with the required prefix
+            formatted_prompt = f'Please provide the bounding box coordinate of the region this sentence describes: <ref>{str(prompt)}</ref>'
+            return formatted_prompt
+        
+        # For operations other than point and detect, return prompt as-is
+        if operation not in ["point", "detect"]:
+            return str(prompt) if prompt is not None else prompt
+        
+        # Handle list or comma-separated string for point/detect operations
+        if isinstance(prompt, list):
+            # If prompt is already a list, use it directly
+            items_to_find = prompt
+        else:
+            # If prompt is a string, split by commas and clean up whitespace
+            items_to_find = [item.strip() for item in str(prompt).split(',')]
+        
+        # Format each item with <ref> tags
+        formatted_items = [f"<ref>{item}</ref>" for item in items_to_find if item]
+        
+        # Join all items and prepend with instruction
+        if formatted_items:
+            formatted_prompt = "Provide the coordinates of the following: " + " ".join(formatted_items)
+            return formatted_prompt
+        else:
+            # If no valid items, return original prompt
+            return str(prompt) if prompt is not None else prompt
+    
     def _to_keypoints(self, points: Union[List[Dict], Dict]) -> fo.Keypoints:
         """Convert keypoint results to FiftyOne Keypoints.
         
@@ -427,7 +471,10 @@ class MiniCPM_V(SamplesMixin, Model):
         if not prompt:
             raise ValueError("No prompt provided.")
 
-        msgs = [{'role': 'user', 'content': [image,  prompt]}]
+        # Format prompt based on operation type
+        formatted_prompt = self._format_prompt_for_operation(prompt, self.operation)
+
+        msgs = [{'role': 'user', 'content': [image,  formatted_prompt]}]
 
         generation_config = dict(
             max_new_tokens=4096, 
@@ -447,6 +494,8 @@ class MiniCPM_V(SamplesMixin, Model):
         elif self.operation == "ocr":
             return output_text.strip()
         elif self.operation == "detect":
+            return self._to_detections(output_text)
+        elif self.operation == "phrase_grounding":
             return self._to_detections(output_text)
         elif self.operation == "classify":
             parsed_output = self._parse_json(output_text)
