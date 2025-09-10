@@ -1,5 +1,7 @@
 # MiniCPM-V Integration for FiftyOne
 
+![MiniCPM-V Demo](minicpm-mq.gif)
+
 Integrate [MiniCPM-V 4.5](https://github.com/OpenBMB/MiniCPM-V), a powerful 8B parameter multimodal language model, as a remote source zoo model in [FiftyOne](https://github.com/voxel51/fiftyone). This integration enables seamless use of MiniCPM-V's advanced vision-language capabilities directly within your FiftyOne workflows.
 
 ## 🌟 Features
