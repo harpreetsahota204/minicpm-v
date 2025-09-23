@@ -170,6 +170,11 @@ class MiniCPM_V(SamplesMixin, Model):
         return "image"
     
     @property
+    def ragged_batches(self):
+        """Enable FiftyOne's batch processing interface."""
+        return True
+    
+    @property
     def operation(self):
         return self._operation
 
@@ -518,3 +523,43 @@ class MiniCPM_V(SamplesMixin, Model):
         if isinstance(image, np.ndarray):
             image = Image.fromarray(image)
         return self._predict(image, sample)
+    
+    def predict_all(self, batch_inputs):
+        """Process a batch of images through the model.
+        
+        This is the simplest possible batch implementation - it processes
+        each image sequentially using the existing predict logic.
+        
+        Args:
+            batch_inputs: List of (image, sample) tuples
+            
+        Returns:
+            List of model predictions in the appropriate format for the current operation
+        """
+        results = []
+        
+        for image, sample in batch_inputs:
+            try:
+                # Convert numpy arrays to PIL Images if needed
+                if isinstance(image, np.ndarray):
+                    image = Image.fromarray(image)
+                
+                # Use existing prediction logic
+                result = self._predict(image, sample)
+                results.append(result)
+                
+            except Exception as e:
+                logger.warning(f"Failed to process sample: {e}")
+                # Return empty result for failed samples
+                if self.operation in ["vqa", "ocr"]:
+                    results.append("")
+                elif self.operation in ["detect", "phrase_grounding"]:
+                    results.append(fo.Detections(detections=[]))
+                elif self.operation == "classify":
+                    results.append(fo.Classifications(classifications=[]))
+                elif self.operation == "point":
+                    results.append(fo.Keypoints(keypoints=[]))
+                else:
+                    results.append(None)
+        
+        return results
